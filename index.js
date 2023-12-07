@@ -1,30 +1,70 @@
-// initialize web server: "app" 
-const express = require('express')
-const app = express()
+// initialize web server: "app"
+const express = require("express");
+const app = express();
 // the port is essentially equivalent to the domain
-const port = 8383
+const port = 8383;
+
+// tell server to use public directory (great for assets like images or fonts)
+app.use(express.static("public"));
+
+// tell server to expect json
+app.use(express.json())
+
+let friends = {}
+
+// CRON scheduler
+function cron(ms, fn) {
+    async function cb() { // callback function
+        clearTimeout(timeout)
+        fn()
+        setTimeout(cb, ms)        
+    }
+    let timeout = setTimeout(cb, ms);
+}
+
+cron(2000, () => console.log(friends))
 
 // routes
-app.get('/', (req, res) => {
-    // handler    (res is the server response)
-    
-    // we can chain responses: 
-    res.status(200).send({message: "hi all good"});
+app.get("/malik", (req, res) => {
+  res.status(200).send("hi from malik");
+});
 
-    // res.sendStatus(200);
-    // 200 - 299 successfull
-    // 300 uncommon
-    // 400 failure on your request (auth issue, wrong route, or can't find anything)
-    // 500 error has occurred on the server and response couldn't be sent in the first place 
-    
-    // res.send({message: "hello node"}) 
-    
-    // res.json({message: "hello world"}) // or to be more explicit, specify that we're sending json
+app.get("/malik/welcome", (req, res) => {
+  // send back html
+  res.status(200).send(`<h1 style="color: green">Welcome</h1>`);
+});
 
-})
 
-app.get('/malik', (req, res) => {
-    res.status(200).send({message: "hi malik"})
-})
 
-app.listen(port, () => console.log(`Server has started on port: ${port}`))
+app.get("/friends", (req, res) => {
+  //handler
+  res.status(200).send(friends);
+});
+
+app.post("/friends", (req, res) => {
+    const { friend, adjective } = req.body
+    console.log(friend)
+    friends[friend] = adjective
+    res.sendStatus(200)
+});
+
+// update info -> patch needs to be asynchronous
+app.patch("/friends", async (req, res) => {
+    const { friend, newAdjective } = req.body
+    friends[friend] = newAdjective
+    res.status(200).send(friends)    
+
+});
+
+app.put("/friends", (req, res) => {});
+
+app.delete("/friends", (req, res) => {
+    const { friend } = req.body
+    delete friends[friend]
+    res.status(200).send(friends) 
+});
+
+
+
+// start the server
+app.listen(port, () => console.log(`Server has started on port: ${port}`));

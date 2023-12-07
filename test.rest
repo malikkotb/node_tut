@@ -1,0 +1,28 @@
+###
+GET http://localhost:8383/friends
+
+###
+POST http://localhost:8383/friends
+Content-Type: application/json
+
+{
+    "friend": "malik",
+    "adjective": "funky"
+}
+
+###
+PATCH http://localhost:8383/friends
+Content-Type: application/json
+
+{
+    "friend": "malik",
+    "newAdjective": "lame"
+}
+
+###
+DELETE http://localhost:8383/friends
+Content-Type: application/json
+
+{ 
+    "friend": "malik"
+}
