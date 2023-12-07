@@ -4,11 +4,22 @@ const app = express();
 // the port is essentially equivalent to the domain
 const port = 8383;
 
-// tell server to use public directory (great for assets like images or fonts)
-app.use(express.static("public"));
+// middleware
+app.use(express.static("public")); // tell server to use public directory (great for assets like images or fonts)
+app.use(express.json()) // tell server to expect json
+// app.use(midWare)
 
-// tell server to expect json
-app.use(express.json())
+function midWare(req, res, next) {
+    // essentially runs in the middle 
+    console.log('running middleware');
+
+    const { api_key } = req.query // destructuring a query in the route (which comes after a '?')
+    console.log(api_key)
+    if (!api_key) {return res.sendStatus(403)}
+
+
+    next() // this says: ok, middleware is cool -> move on
+}
 
 let friends = {}
 
@@ -34,6 +45,15 @@ app.get("/malik/welcome", (req, res) => {
   res.status(200).send(`<h1 style="color: green">Welcome</h1>`);
 });
 
+// query parameter
+app.get('/friends/:id', midWare, (req, res) => {
+    const { id } = req.params // destructuring a parameter in the route
+    const { api_key } = req.query // destructuring a query in the route (which comes after a '?')
+    console.log(id, api_key)
+    if (!api_key) {res.sendStatus(403)}
+    
+    res.status(200).send(friends[id])
+})
 
 
 app.get("/friends", (req, res) => {
